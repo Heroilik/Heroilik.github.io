@@ -763,6 +763,30 @@
             color: #ffd700;
             margin: 15px 0;
         }
+        .daily-bonus {
+            background: rgba(255,215,0,0.1);
+            border: 1px solid #ffd700;
+            border-radius: 15px;
+            padding: 10px;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        .daily-bonus button {
+            background: linear-gradient(145deg, #ffd700, #ffa500);
+            border: none;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .daily-bonus button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
         .slot-machine {
             display: flex;
             gap: 20px;
@@ -804,7 +828,7 @@
             margin-bottom: 15px;
         }
         
-        /* Магазин казино */
+        /* Магазин казино (расширенный) */
         .casino-shop {
             margin-top: 30px;
             border-top: 2px dashed rgba(255,215,0,0.3);
@@ -831,6 +855,8 @@
             text-align: center;
             transition: all 0.3s;
             cursor: pointer;
+            position: relative;
+            overflow: hidden;
         }
         .shop-item:hover {
             transform: translateY(-3px);
@@ -841,6 +867,17 @@
             opacity: 0.5;
             pointer-events: none;
             filter: grayscale(0.8);
+        }
+        .shop-item-level {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #ffd700;
+            color: black;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
         }
         .shop-item-icon {
             font-size: 40px;
@@ -1159,7 +1196,7 @@
             <!-- ЕДИНАЯ КНОПКА ВСЕХ ДОСТИЖЕНИЙ -->
             <button class="all-achievements-button" onclick="openAllAchievements()">
                 <i class="fas fa-trophy"></i>
-                <span>Все достижения (<span id="totalAchievementCount">0/48</span>)</span>
+                <span>Все достижения (<span id="totalAchievementCount">0/52</span>)</span>
             </button>
 
             <!-- НОВЫЕ КРАСИВЫЕ КАРТОЧКИ ПОКУПОК -->
@@ -1344,11 +1381,17 @@
                 </div>
             </div>
 
-            <!-- Казино таб (ОБНОВЛЕННОЕ) -->
+            <!-- Казино таб (ОБНОВЛЕННОЕ С ЕЖЕДНЕВНЫМ БОНУСОМ И РАСШИРЕННЫМ МАГАЗИНОМ) -->
             <div class="tab-content" id="tab-casino">
                 <div class="casino-container">
                     <h3 style="color:white;">🎰 Однорукий бандит</h3>
                     <div class="casino-balance" id="casinoBalance">100 ₽</div>
+                    
+                    <!-- ЕЖЕДНЕВНЫЙ БОНУС -->
+                    <div class="daily-bonus" id="dailyBonus">
+                        <span>🎁 Ежедневный бонус: 50₽</span>
+                        <button onclick="claimDailyBonus()" id="dailyBonusBtn">Получить</button>
+                    </div>
                     
                     <div class="win-probability" id="winProbability"></div>
                     
@@ -1359,7 +1402,7 @@
                     </div>
                     
                     <div class="bet-controls">
-                        <label style="color:white;">Ставка:</label>
+                        <label style="color:white;">Ставка (макс 1000):</label>
                         <input type="number" id="betAmount" class="bet-input" value="10" min="1" max="1000" onchange="updateWinProbability()">
                     </div>
                     
@@ -1378,35 +1421,59 @@
                         <span>7️⃣ x3 = x20</span>
                     </div>
 
-                    <!-- МАГАЗИН КАЗИНО -->
+                    <!-- РАСШИРЕННЫЙ МАГАЗИН КАЗИНО (УВЕЛИЧЕННЫЕ ЦЕНЫ) -->
                     <div class="casino-shop">
                         <div class="shop-title">
-                            <i class="fas fa-store"></i> Магазин казино
+                            <i class="fas fa-store"></i> Магазин казино (улучшения)
                         </div>
                         <div class="shop-items" id="casinoShop">
                             <div class="shop-item" onclick="buyShopItem('luck')" id="shopLuck">
+                                <span class="shop-item-level" id="luckLevel">Ур.0</span>
                                 <div class="shop-item-icon"><i class="fas fa-clover"></i></div>
                                 <div class="shop-item-name">Амулет удачи</div>
-                                <div class="shop-item-desc">Увеличивает шанс выигрыша на 5%</div>
-                                <div class="shop-item-price" id="luckPrice">500 ₽</div>
+                                <div class="shop-item-desc">Увеличивает шанс выигрыша на 5% за уровень</div>
+                                <div class="shop-item-price" id="luckPrice">1000 ₽</div>
                             </div>
                             <div class="shop-item" onclick="buyShopItem('multiplier')" id="shopMultiplier">
+                                <span class="shop-item-level" id="multiplierLevel">Ур.1</span>
                                 <div class="shop-item-icon"><i class="fas fa-chart-line"></i></div>
                                 <div class="shop-item-name">Множитель выигрыша</div>
-                                <div class="shop-item-desc">x2 к выигрышу</div>
-                                <div class="shop-item-price" id="multiplierPrice">1000 ₽</div>
+                                <div class="shop-item-desc">Увеличивает выигрыш (ур.1 = x1, ур.2 = x2 и т.д.)</div>
+                                <div class="shop-item-price" id="multiplierPrice">2000 ₽</div>
                             </div>
                             <div class="shop-item" onclick="buyShopItem('insurance')" id="shopInsurance">
                                 <div class="shop-item-icon"><i class="fas fa-shield-alt"></i></div>
                                 <div class="shop-item-name">Страховка</div>
-                                <div class="shop-item-desc">Возврат 50% при проигрыше</div>
-                                <div class="shop-item-price" id="insurancePrice">750 ₽</div>
+                                <div class="shop-item-desc">Возврат 50% при проигрыше (одноразово)</div>
+                                <div class="shop-item-price" id="insurancePrice">1500 ₽</div>
                             </div>
                             <div class="shop-item" onclick="buyShopItem('freeSpin')" id="shopFreeSpin">
+                                <span class="shop-item-level" id="freeSpinLevel">0</span>
                                 <div class="shop-item-icon"><i class="fas fa-gift"></i></div>
-                                <div class="shop-item-name">Бесплатный спин</div>
-                                <div class="shop-item-desc">Одна бесплатная игра</div>
-                                <div class="shop-item-price" id="freeSpinPrice">200 ₽</div>
+                                <div class="shop-item-name">Бесплатные спины</div>
+                                <div class="shop-item-desc">Количество бесплатных вращений</div>
+                                <div class="shop-item-price" id="freeSpinPrice">500 ₽</div>
+                            </div>
+                            <div class="shop-item" onclick="buyShopItem('vip')" id="shopVip">
+                                <span class="shop-item-level" id="vipLevel">Ур.0</span>
+                                <div class="shop-item-icon"><i class="fas fa-crown"></i></div>
+                                <div class="shop-item-name">VIP статус</div>
+                                <div class="shop-item-desc">+10% к шансу, +0.5 к множителю, +25% страховка</div>
+                                <div class="shop-item-price" id="vipPrice">5000 ₽</div>
+                            </div>
+                            <div class="shop-item" onclick="buyShopItem('doubleWin')" id="shopDoubleWin">
+                                <span class="shop-item-level" id="doubleWinLevel">Ур.0</span>
+                                <div class="shop-item-icon"><i class="fas fa-star"></i></div>
+                                <div class="shop-item-name">Удвоение выигрыша</div>
+                                <div class="shop-item-desc">Шанс 10% удвоить любой выигрыш</div>
+                                <div class="shop-item-price" id="doubleWinPrice">3000 ₽</div>
+                            </div>
+                            <div class="shop-item" onclick="buyShopItem('jackpotChance')" id="shopJackpot">
+                                <span class="shop-item-level" id="jackpotLevel">Ур.0</span>
+                                <div class="shop-item-icon"><i class="fas fa-dragon"></i></div>
+                                <div class="shop-item-name">Шанс джекпота</div>
+                                <div class="shop-item-desc">Увеличивает шанс выпадения 7️⃣</div>
+                                <div class="shop-item-price" id="jackpotPrice">2500 ₽</div>
                             </div>
                         </div>
                     </div>
@@ -1570,12 +1637,13 @@
         const BANNER_KEY = 'tallin_banner';
         const AVATAR_KEY = 'tallin_avatar';
         const THEME_KEY = 'tallin_theme';
+        const DAILY_BONUS_KEY = 'tallin_daily_bonus';
 
         // Telegram
         let tg = null;
         try { tg = window.Telegram?.WebApp; if(tg) tg.ready(); } catch(e){}
 
-        // ==================== ДОСТИЖЕНИЯ (48 шт) ====================
+        // ==================== ДОСТИЖЕНИЯ (52 шт) ====================
         const mainAchievements = [
             { id: 'click1', name: 'Первый клик', desc: 'Сделать 1 клик', icon: 'fa-hand-pointer', game: 'clicker', condition: () => totalClicks >= 1, unlocked: false },
             { id: 'click100', name: 'Трудяга', desc: '100 кликов', icon: 'fa-hand-fist', game: 'clicker', condition: () => totalClicks >= 100, unlocked: false },
@@ -1622,6 +1690,9 @@
             { id: 'casinoShop', name: 'Шопоголик', desc: 'Купить предмет в магазине', icon: 'fa-shopping-cart', game: 'casino', condition: () => casinoShopPurchases >= 1, unlocked: false },
             { id: 'casinoHighRoller', name: 'Хайроллер', desc: 'Поставить 500₽ за раз', icon: 'fa-gem', game: 'casino', condition: () => casinoHighRoller >= 1, unlocked: false },
             { id: 'casinoLucky', name: 'Счастливчик', desc: 'Выиграть с минимальным шансом', icon: 'fa-star', game: 'casino', condition: () => casinoLuckyWin >= 1, unlocked: false },
+            { id: 'casinoDaily', name: 'Ежедневный', desc: 'Получить 10 ежедневных бонусов', icon: 'fa-calendar', game: 'casino', condition: () => casinoDailyBonuses >= 10, unlocked: false },
+            { id: 'casinoVIP', name: 'VIP', desc: 'Купить VIP статус', icon: 'fa-crown', game: 'casino', condition: () => casinoVIP > 0, unlocked: false },
+            { id: 'casinoDouble', name: 'Удачливый', desc: 'Активировать удвоение выигрыша', icon: 'fa-star', game: 'casino', condition: () => casinoDoubleWins >= 1, unlocked: false },
         ];
 
         const allAchievements = [...mainAchievements, ...pongAchievements, ...tttAchievements, ...casinoAchievements];
@@ -1643,7 +1714,7 @@
         let superBonusActive = false, superBonusMultiplier = 2;
         let superBonusTimeLeft = 0, superBonusInterval;
 
-        // ==================== ПЕРЕМЕННЫЕ КАЗИНО (ОБНОВЛЕННЫЕ) ====================
+        // ==================== ПЕРЕМЕННЫЕ КАЗИНО (РАСШИРЕННЫЕ) ====================
         let casinoBalance = 100;
         let casinoTotalBets = 0;
         let casinoWins = 0;
@@ -1651,12 +1722,18 @@
         let casinoShopPurchases = 0;
         let casinoHighRoller = 0;
         let casinoLuckyWin = 0;
+        let casinoDailyBonuses = 0;
+        let casinoVIP = 0;
+        let casinoDoubleWins = 0;
         
-        // Бонусы магазина
-        let casinoLuckBonus = 0; // +% к шансу выигрыша
-        let casinoMultiplier = 1; // множитель выигрыша
-        let casinoInsurance = false; // страховка (возврат 50% при проигрыше)
+        // Бонусы магазина (расширенные)
+        let casinoLuckBonus = 0; // +% к шансу выигрыша за уровень
+        let casinoMultiplier = 1; // базовый множитель
+        let casinoInsurance = false; // страховка (одноразовая)
         let casinoFreeSpins = 0; // количество бесплатных спинов
+        let casinoVIPLevel = 0; // уровень VIP (0-5)
+        let casinoDoubleWinChance = 0; // шанс удвоения выигрыша (%)
+        let casinoJackpotBonus = 0; // +% к шансу джекпота
 
         // ==================== ПИНГ-ПОНГ ====================
         let pongWins = 0, pongPerfectGames = 0, pongAces = 0, pongComebacks = 0, pongImpossibleWins = 0;
@@ -1780,10 +1857,16 @@
                     casinoShopPurchases = data.casinoShopPurchases || 0;
                     casinoHighRoller = data.casinoHighRoller || 0;
                     casinoLuckyWin = data.casinoLuckyWin || 0;
+                    casinoDailyBonuses = data.casinoDailyBonuses || 0;
+                    casinoVIP = data.casinoVIP || 0;
+                    casinoDoubleWins = data.casinoDoubleWins || 0;
                     casinoLuckBonus = data.casinoLuckBonus || 0;
                     casinoMultiplier = data.casinoMultiplier || 1;
                     casinoInsurance = data.casinoInsurance || false;
                     casinoFreeSpins = data.casinoFreeSpins || 0;
+                    casinoVIPLevel = data.casinoVIPLevel || 0;
+                    casinoDoubleWinChance = data.casinoDoubleWinChance || 0;
+                    casinoJackpotBonus = data.casinoJackpotBonus || 0;
                     
                     if (data.achievements) {
                         data.achievements.forEach(saved => {
@@ -1796,6 +1879,7 @@
             updateUI();
             updateCasinoUI();
             updateShopUI();
+            checkDailyBonus();
         }
 
         function saveGame() {
@@ -1805,8 +1889,9 @@
                 pongWins, pongPerfectGames, pongAces, pongComebacks, pongImpossibleWins,
                 tttWins, tttDraws, tttLosses, tttPerfectGames, tttHardWins, tttNoLossStreak,
                 casinoBalance, casinoTotalBets, casinoWins, casinoJackpots,
-                casinoShopPurchases, casinoHighRoller, casinoLuckyWin,
-                casinoLuckBonus, casinoMultiplier, casinoInsurance, casinoFreeSpins,
+                casinoShopPurchases, casinoHighRoller, casinoLuckyWin, casinoDailyBonuses,
+                casinoVIP, casinoDoubleWins, casinoLuckBonus, casinoMultiplier,
+                casinoInsurance, casinoFreeSpins, casinoVIPLevel, casinoDoubleWinChance, casinoJackpotBonus,
                 achievements: allAchievements.map(a => ({ id: a.id, unlocked: a.unlocked }))
             };
             localStorage.setItem(SAVE_KEY, JSON.stringify(data));
@@ -1932,10 +2017,10 @@
             const bet = parseInt(document.getElementById('betAmount').value) || 10;
             // Шанс выигрыша обратно пропорционален ставке
             let baseChance = Math.max(5, 30 - Math.floor(bet / 10));
-            baseChance = Math.min(40, baseChance); // Максимум 40%, минимум 5%
+            baseChance = Math.min(40, baseChance);
             
-            // Добавляем бонус от магазина
-            const totalChance = baseChance + casinoLuckBonus;
+            // Добавляем бонусы
+            const totalChance = baseChance + casinoLuckBonus + (casinoVIPLevel * 2);
             
             document.getElementById('winProbability').innerHTML = 
                 `Шанс выигрыша: <span style="color:#ffd700;">${Math.min(80, totalChance)}%</span> (чем больше ставка, тем меньше шанс)`;
@@ -1943,6 +2028,12 @@
 
         function spinSlotMachine() {
             let betAmount = parseInt(document.getElementById('betAmount').value);
+            
+            // Принудительно ограничиваем ставку до 1000
+            if (betAmount > 1000) {
+                betAmount = 1000;
+                document.getElementById('betAmount').value = 1000;
+            }
             
             // Используем бесплатный спин если есть
             if (casinoFreeSpins > 0) {
@@ -1968,9 +2059,9 @@
 
             casinoTotalBets++;
 
-            // Определяем выигрыш (чем больше ставка, тем меньше шанс)
+            // Определяем выигрыш
             const baseWinChance = Math.max(5, 30 - Math.floor(betAmount / 10));
-            const winChance = Math.min(80, baseWinChance + casinoLuckBonus);
+            const winChance = Math.min(80, baseWinChance + casinoLuckBonus + (casinoVIPLevel * 2));
             
             const isWin = Math.random() * 100 < winChance;
             
@@ -1979,18 +2070,20 @@
 
             if (isWin) {
                 // Генерируем выигрышную комбинацию
-                const rand = Math.random();
-                if (rand < 0.6) { // 60% - обычный выигрыш
-                    slot1 = slot2 = slot3 = '🍒';
-                    multiplier = 5;
-                } else if (rand < 0.9) { // 30% - хороший выигрыш
-                    slot1 = slot2 = slot3 = '💎';
-                    multiplier = 10;
-                } else { // 10% - джекпот
+                const jackpotRoll = Math.random() * 100;
+                const jackpotThreshold = 10 + casinoJackpotBonus;
+                
+                if (jackpotRoll < jackpotThreshold) { // джекпот
                     slot1 = slot2 = slot3 = '7️⃣';
                     multiplier = 20;
                     casinoJackpots++;
                     showNotification('🎰 ДЖЕКПОТ!', 'success');
+                } else if (Math.random() < 0.3) { // 30% - хороший выигрыш
+                    slot1 = slot2 = slot3 = '💎';
+                    multiplier = 10;
+                } else { // 60% - обычный выигрыш
+                    slot1 = slot2 = slot3 = '🍒';
+                    multiplier = 5;
                 }
                 
                 if (multiplier === 20) {
@@ -2016,13 +2109,21 @@
             document.getElementById('slot3').textContent = slot3;
 
             if (multiplier > 0) {
-                const winAmount = betAmount * multiplier * casinoMultiplier;
-                casinoBalance += winAmount;
+                let winAmount = betAmount * multiplier * (casinoMultiplier + casinoVIPLevel * 0.5);
+                
+                // Проверка на удвоение
+                if (Math.random() * 100 < casinoDoubleWinChance) {
+                    winAmount *= 2;
+                    casinoDoubleWins++;
+                    showNotification('✨ Удвоение выигрыша!', 'success');
+                }
+                
+                casinoBalance += Math.floor(winAmount);
                 playCasinoWinSound();
-                showNotification(`🎉 Вы выиграли ${winAmount}₽! (x${multiplier * casinoMultiplier})`, 'success');
+                showNotification(`🎉 Вы выиграли ${Math.floor(winAmount)}₽! (x${multiplier * (casinoMultiplier + casinoVIPLevel * 0.5)})`, 'success');
             } else {
                 if (casinoInsurance) {
-                    const refund = Math.floor(betAmount * 0.5);
+                    const refund = Math.floor(betAmount * (0.5 + casinoVIPLevel * 0.05));
                     casinoBalance += refund;
                     showNotification(`😢 Проигрыш, но страховка вернула ${refund}₽`, 'info');
                 } else {
@@ -2044,6 +2145,9 @@
             casinoMultiplier = 1;
             casinoInsurance = false;
             casinoFreeSpins = 0;
+            casinoVIPLevel = 0;
+            casinoDoubleWinChance = 0;
+            casinoJackpotBonus = 0;
             document.getElementById('slot1').textContent = '🍒';
             document.getElementById('slot2').textContent = '🍒';
             document.getElementById('slot3').textContent = '🍒';
@@ -2053,14 +2157,58 @@
             saveGame();
         }
 
-        // ==================== МАГАЗИН КАЗИНО ====================
-        function updateShopUI() {
-            document.getElementById('luckPrice').textContent = (500 + casinoLuckBonus * 100) + ' ₽';
-            document.getElementById('multiplierPrice').textContent = (1000 * (casinoMultiplier)) + ' ₽';
-            document.getElementById('insurancePrice').textContent = casinoInsurance ? 'Куплено' : '750 ₽';
-            document.getElementById('freeSpinPrice').textContent = (200 + casinoFreeSpins * 50) + ' ₽';
+        // ==================== ЕЖЕДНЕВНЫЙ БОНУС ====================
+        function checkDailyBonus() {
+            const lastBonus = localStorage.getItem(DAILY_BONUS_KEY);
+            const today = new Date().toDateString();
             
+            if (lastBonus === today) {
+                document.getElementById('dailyBonusBtn').disabled = true;
+                document.getElementById('dailyBonusBtn').textContent = 'Уже получено';
+            } else {
+                document.getElementById('dailyBonusBtn').disabled = false;
+                document.getElementById('dailyBonusBtn').textContent = 'Получить';
+            }
+        }
+
+        function claimDailyBonus() {
+            const lastBonus = localStorage.getItem(DAILY_BONUS_KEY);
+            const today = new Date().toDateString();
+            
+            if (lastBonus !== today) {
+                casinoBalance += 50;
+                casinoDailyBonuses++;
+                localStorage.setItem(DAILY_BONUS_KEY, today);
+                showNotification('🎁 Получен ежедневный бонус 50₽!', 'success');
+                updateCasinoUI();
+                checkAchievements();
+                saveGame();
+                checkDailyBonus();
+            }
+        }
+
+        // ==================== РАСШИРЕННЫЙ МАГАЗИН КАЗИНО (УВЕЛИЧЕННЫЕ ЦЕНЫ) ====================
+        function updateShopUI() {
+            document.getElementById('luckLevel').textContent = `Ур.${casinoLuckBonus/5}`;
+            document.getElementById('luckPrice').textContent = (1000 + casinoLuckBonus * 200) + ' ₽';
+            
+            document.getElementById('multiplierLevel').textContent = `Ур.${casinoMultiplier}`;
+            document.getElementById('multiplierPrice').textContent = (2000 * casinoMultiplier) + ' ₽';
+            
+            document.getElementById('insurancePrice').textContent = casinoInsurance ? 'Куплено' : '1500 ₽';
             document.getElementById('shopInsurance').classList.toggle('disabled', casinoInsurance);
+            
+            document.getElementById('freeSpinLevel').textContent = casinoFreeSpins;
+            document.getElementById('freeSpinPrice').textContent = (500 + casinoFreeSpins * 100) + ' ₽';
+            
+            document.getElementById('vipLevel').textContent = `Ур.${casinoVIPLevel}`;
+            document.getElementById('vipPrice').textContent = (5000 * (casinoVIPLevel + 1)) + ' ₽';
+            
+            document.getElementById('doubleWinLevel').textContent = `Ур.${casinoDoubleWinChance/10}`;
+            document.getElementById('doubleWinPrice').textContent = (3000 + casinoDoubleWinChance * 200) + ' ₽';
+            
+            document.getElementById('jackpotLevel').textContent = `Ур.${casinoJackpotBonus}`;
+            document.getElementById('jackpotPrice').textContent = (2500 + casinoJackpotBonus * 500) + ' ₽';
         }
 
         function buyShopItem(item) {
@@ -2069,25 +2217,27 @@
             
             switch(item) {
                 case 'luck':
-                    price = 500 + casinoLuckBonus * 100;
-                    if (casinoBalance >= price) {
+                    price = 1000 + casinoLuckBonus * 200;
+                    if (casinoBalance >= price && casinoLuckBonus < 50) {
                         casinoBalance -= price;
                         casinoLuckBonus += 5;
                         success = true;
-                        showNotification('🍀 Куплен амулет удачи! +5% к шансу', 'success');
+                        showNotification('🍀 Амулет удачи улучшен! +5% к шансу', 'success');
                     }
                     break;
+                    
                 case 'multiplier':
-                    price = 1000 * casinoMultiplier;
-                    if (casinoBalance >= price) {
+                    price = 2000 * casinoMultiplier;
+                    if (casinoBalance >= price && casinoMultiplier < 10) {
                         casinoBalance -= price;
                         casinoMultiplier++;
                         success = true;
                         showNotification('📈 Множитель увеличен!', 'success');
                     }
                     break;
+                    
                 case 'insurance':
-                    price = 750;
+                    price = 1500;
                     if (!casinoInsurance && casinoBalance >= price) {
                         casinoBalance -= price;
                         casinoInsurance = true;
@@ -2095,13 +2245,45 @@
                         showNotification('🛡️ Страховка активирована!', 'success');
                     }
                     break;
+                    
                 case 'freeSpin':
-                    price = 200 + casinoFreeSpins * 50;
+                    price = 500 + casinoFreeSpins * 100;
                     if (casinoBalance >= price) {
                         casinoBalance -= price;
                         casinoFreeSpins++;
                         success = true;
                         showNotification('🎰 Бесплатный спин получен!', 'success');
+                    }
+                    break;
+                    
+                case 'vip':
+                    price = 5000 * (casinoVIPLevel + 1);
+                    if (casinoBalance >= price && casinoVIPLevel < 5) {
+                        casinoBalance -= price;
+                        casinoVIPLevel++;
+                        casinoVIP++;
+                        success = true;
+                        showNotification('👑 VIP статус повышен! +2% к шансу, +0.5 к множителю', 'success');
+                    }
+                    break;
+                    
+                case 'doubleWin':
+                    price = 3000 + casinoDoubleWinChance * 200;
+                    if (casinoBalance >= price && casinoDoubleWinChance < 50) {
+                        casinoBalance -= price;
+                        casinoDoubleWinChance += 10;
+                        success = true;
+                        showNotification('✨ Шанс удвоения увеличен!', 'success');
+                    }
+                    break;
+                    
+                case 'jackpot':
+                    price = 2500 + casinoJackpotBonus * 500;
+                    if (casinoBalance >= price && casinoJackpotBonus < 20) {
+                        casinoBalance -= price;
+                        casinoJackpotBonus++;
+                        success = true;
+                        showNotification('🐉 Шанс джекпота увеличен!', 'success');
                     }
                     break;
             }
@@ -2114,7 +2296,7 @@
                 checkAchievements();
                 saveGame();
             } else {
-                showNotification('❌ Недостаточно средств или уже куплено', 'error');
+                showNotification('❌ Недостаточно средств или достигнут максимум', 'error');
             }
         }
 
@@ -2293,8 +2475,8 @@
             showNotification('💾 Данные сохранены в PostgreSQL (демо)', 'success');
             document.getElementById('postgresResult').innerHTML = `
                 <i class="fas fa-check-circle" style="color:#4CAF50;"></i> 
-                INSERT INTO users (username, score, click_power, auto_clickers, casino_balance) 
-                VALUES ('TALLIN', ${score}, ${clickPower}, ${autoClickers}, ${casinoBalance});<br>
+                INSERT INTO users (username, score, click_power, auto_clickers, casino_balance, casino_vip, casino_double_chance) 
+                VALUES ('TALLIN', ${score}, ${clickPower}, ${autoClickers}, ${casinoBalance}, ${casinoVIPLevel}, ${casinoDoubleWinChance});<br>
                 <span style="color:#4CAF50;">✅ Запрос выполнен успешно! (демо)</span>
             `;
         }
@@ -2302,9 +2484,9 @@
         // ==================== REST API ДЕМО ====================
         function simulateRestApiGet() {
             const mockUsers = [
-                { id: 1, username: 'TALLIN', score: score, click_power: clickPower, auto_clickers: autoClickers, casino_balance: casinoBalance, casino_bonus: casinoLuckBonus },
-                { id: 2, username: 'Player2', score: 500, click_power: 3, auto_clickers: 1, casino_balance: 200, casino_bonus: 0 },
-                { id: 3, username: 'Player3', score: 250, click_power: 2, auto_clickers: 0, casino_balance: 50, casino_bonus: 5 }
+                { id: 1, username: 'TALLIN', score: score, click_power: clickPower, auto_clickers: autoClickers, casino_balance: casinoBalance, casino_vip: casinoVIPLevel, casino_double: casinoDoubleWinChance },
+                { id: 2, username: 'Player2', score: 500, click_power: 3, auto_clickers: 1, casino_balance: 200, casino_vip: 0, casino_double: 0 },
+                { id: 3, username: 'Player3', score: 250, click_power: 2, auto_clickers: 0, casino_balance: 50, casino_vip: 1, casino_double: 10 }
             ];
             
             document.getElementById('restapiResult').innerHTML = `
@@ -2324,7 +2506,8 @@
                 click_power: clickPower,
                 auto_clickers: autoClickers,
                 casino_balance: casinoBalance,
-                casino_bonus: casinoLuckBonus,
+                casino_vip: casinoVIPLevel,
+                casino_double: casinoDoubleWinChance,
                 created_at: new Date().toISOString()
             };
             
@@ -2428,7 +2611,7 @@
         }
 
         function shareToTelegram() { 
-            if(tg) tg.sendData(JSON.stringify({score, casinoBalance}));
+            if(tg) tg.sendData(JSON.stringify({score, casinoBalance, casinoVIPLevel}));
             showNotification('📤 Данные отправлены в Telegram', 'success');
         }
 
@@ -2453,6 +2636,7 @@
             if (tab==='casino') {
                 updateCasinoUI();
                 updateShopUI();
+                checkDailyBonus();
             }
         }
 
@@ -2469,6 +2653,7 @@
                 document.getElementById('casinoShop').scrollIntoView({ behavior: 'smooth' });
             }
             else if (key === 'p') switchTab('playlist');
+            else if (key === 'b') claimDailyBonus();
         });
 
         // ==================== СБРОС ====================
@@ -2479,12 +2664,15 @@
                 pongWins = 0; pongPerfectGames = 0; pongAces = 0; pongComebacks = 0; pongImpossibleWins = 0;
                 tttWins = 0; tttDraws = 0; tttLosses = 0; tttPerfectGames = 0; tttHardWins = 0; tttNoLossStreak = 0;
                 casinoBalance = 100; casinoTotalBets = 0; casinoWins = 0; casinoJackpots = 0;
-                casinoShopPurchases = 0; casinoHighRoller = 0; casinoLuckyWin = 0;
-                casinoLuckBonus = 0; casinoMultiplier = 1; casinoInsurance = false; casinoFreeSpins = 0;
+                casinoShopPurchases = 0; casinoHighRoller = 0; casinoLuckyWin = 0; casinoDailyBonuses = 0;
+                casinoVIP = 0; casinoDoubleWins = 0; casinoLuckBonus = 0; casinoMultiplier = 1;
+                casinoInsurance = false; casinoFreeSpins = 0; casinoVIPLevel = 0; casinoDoubleWinChance = 0;
+                casinoJackpotBonus = 0;
                 allAchievements.forEach(a => a.unlocked = false);
                 if (autoInterval) clearInterval(autoInterval);
                 deactivateSuperBonus();
                 localStorage.removeItem(SAVE_KEY);
+                localStorage.removeItem(DAILY_BONUS_KEY);
                 updateUI();
                 updateCasinoUI();
                 updateShopUI();
@@ -2503,6 +2691,7 @@
             loadPlaylist(); renderTttBoard();
             updateCasinoUI();
             updateShopUI();
+            checkDailyBonus();
             setInterval(()=>saveGame(),10000);
             
             clickSounds.forEach(sound => { sound.load(); });
