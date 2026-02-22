@@ -461,6 +461,48 @@
             bottom: 90px;
         }
 
+        /* Скрытая кнопка-ссылка внизу */
+        .secret-link {
+            position: fixed;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1999;
+            opacity: 0.3;
+            transition: all 0.3s ease;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(5px);
+            padding: 8px 20px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            color: rgba(255, 255, 255, 0.5);
+            text-decoration: none;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .secret-link:hover {
+            opacity: 1;
+            background: rgba(0, 0, 0, 0.4);
+            border-color: rgba(255, 215, 0, 0.5);
+            color: rgba(255, 215, 0, 0.9);
+            transform: translateX(-50%) scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .secret-link i {
+            font-size: 14px;
+            opacity: 0.7;
+        }
+
+        .secret-link:hover i {
+            opacity: 1;
+            color: #ffd700;
+        }
+
         .main-container {
             display: flex;
             gap: 20px;
@@ -1465,6 +1507,13 @@
         <i class="fas fa-headset"></i>
         <span class="tooltip">Поддержка</span>
     </button>
+
+    <!-- Скрытая кнопка-ссылка внизу (ЗАМЕНИТЕ ССЫЛКУ) -->
+    <a href="https://heroilik.github.io/Heroilik1.github.io/" class="secret-link" target="_blank" rel="noopener noreferrer">
+        <i class="fas fa-link"></i>
+        <span>🔗 Ссылка на игру </span>
+        <i class="fas fa-external-link-alt"></i>
+    </a>
 
     <!-- Контейнер для всплывающих уведомлений -->
     <div class="notification-container" id="notificationContainer"></div>
@@ -3089,5 +3138,3 @@
     </script>
 </body>
 </html>
-
-
