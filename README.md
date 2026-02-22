@@ -18,10 +18,158 @@
             cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="%23ffd700"><circle cx="12" cy="12" r="10" fill="%23ffd700" opacity="0.8"/><circle cx="12" cy="12" r="5" fill="white"/></svg>') 12 12, auto !important;
         }
 
+        /* ===== АНИМИРОВАННЫЙ ЭКРАН ЗАГРУЗКИ ===== */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+
+        .loading-screen.fade-out {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loading-content {
+            text-align: center;
+            color: white;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .loading-spinner {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 30px;
+            position: relative;
+            animation: rotate 10s linear infinite;
+        }
+
+        .spinner-ring {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 4px solid transparent;
+            border-top-color: #ffd700;
+            border-radius: 50%;
+            animation: spin 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+        }
+
+        .spinner-ring:nth-child(2) {
+            width: 80%;
+            height: 80%;
+            top: 10%;
+            left: 10%;
+            border-top-color: #ff6b6b;
+            animation: spin 2s reverse infinite;
+        }
+
+        .spinner-ring:nth-child(3) {
+            width: 60%;
+            height: 60%;
+            top: 20%;
+            left: 20%;
+            border-top-color: #4CAF50;
+            animation: spin 1s infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-title {
+            font-size: 48px;
+            font-weight: 900;
+            margin-bottom: 15px;
+            text-shadow: 0 0 30px rgba(255,215,0,0.5);
+            background: linear-gradient(45deg, #ffd700, #ff6b6b, #4CAF50, #ffd700);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientShift 3s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .loading-subtitle {
+            font-size: 18px;
+            opacity: 0.9;
+            margin-bottom: 30px;
+        }
+
+        .loading-progress {
+            width: 300px;
+            height: 6px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .loading-progress-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #ffd700, #ff6b6b);
+            border-radius: 10px;
+            animation: progress 2s ease-in-out forwards;
+        }
+
+        @keyframes progress {
+            0% { width: 0%; }
+            20% { width: 20%; }
+            40% { width: 40%; }
+            60% { width: 60%; }
+            80% { width: 80%; }
+            100% { width: 100%; }
+        }
+
+        .loading-particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 50%;
+            animation: particleFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes particleFloat {
+            0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
+            50% { transform: translateY(-100px) translateX(50px); opacity: 1; }
+        }
+
         body {
             min-height: 100vh;
             background-size: 400% 400%;
-            animation: gradient 10s ease infinite;
+            animation: gradientBG 15s ease infinite;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -31,18 +179,172 @@
             overflow-x: hidden;
         }
 
-        @keyframes gradient {
+        @keyframes gradientBG {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
 
-        /* ТЕМЫ */
-        body.theme-sunset { background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab); }
-        body.theme-night { background: linear-gradient(135deg, #141E30 0%, #243B55 100%); }
-        body.theme-forest { background: linear-gradient(120deg, #134E5E 0%, #71B280 100%); }
-        body.theme-ocean { background: linear-gradient(135deg, #00B4DB 0%, #0083B0 100%); }
-        body.theme-space { background: linear-gradient(135deg, #0F2027 0%, #203A43 50%, #2C5364 100%); }
+        /* ===== АНИМИРОВАННЫЕ ТЕМЫ ===== */
+        body.theme-sunset { 
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            position: relative;
+        }
+        
+        body.theme-sunset::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 20%, rgba(255,215,0,0.3) 0%, transparent 50%);
+            pointer-events: none;
+            animation: sunGlow 8s ease-in-out infinite;
+        }
+
+        @keyframes sunGlow {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.2); }
+        }
+
+        body.theme-night { 
+            background: linear-gradient(135deg, #141E30 0%, #243B55 100%);
+            position: relative;
+        }
+
+        body.theme-night::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 80% 20%, rgba(255,255,255,0.8) 0%, transparent 30%);
+            pointer-events: none;
+            animation: moonGlow 6s ease-in-out infinite;
+        }
+
+        body.theme-night::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(2px 2px at 10px 20px, white, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 30px 50px, white, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 70px 80px, white, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 150px 40px, white, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 250px 100px, white, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 350px 150px, white, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 450px 70px, white, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 550px 200px, white, rgba(0,0,0,0));
+            background-repeat: repeat;
+            pointer-events: none;
+            animation: stars 50s linear infinite;
+        }
+
+        @keyframes stars {
+            from { transform: translateY(0); }
+            to { transform: translateY(-1000px); }
+        }
+
+        @keyframes moonGlow {
+            0%, 100% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.1); }
+        }
+
+        body.theme-forest { 
+            background: linear-gradient(120deg, #134E5E 0%, #71B280 100%);
+            position: relative;
+        }
+
+        body.theme-forest::before {
+            content: '🌲🌳🌲🌳';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            font-size: 50px;
+            white-space: nowrap;
+            opacity: 0.2;
+            pointer-events: none;
+            animation: forestMove 20s linear infinite;
+        }
+
+        @keyframes forestMove {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(100%); }
+        }
+
+        body.theme-ocean { 
+            background: linear-gradient(135deg, #00B4DB 0%, #0083B0 100%);
+            position: relative;
+        }
+
+        body.theme-ocean::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(transparent 0px, transparent 10px, rgba(255,255,255,0.1) 10px, rgba(255,255,255,0.1) 20px);
+            pointer-events: none;
+            animation: waves 3s linear infinite;
+        }
+
+        @keyframes waves {
+            from { transform: translateY(0); }
+            to { transform: translateY(20px); }
+        }
+
+        body.theme-space { 
+            background: linear-gradient(135deg, #0F2027 0%, #203A43 50%, #2C5364 100%);
+            position: relative;
+        }
+
+        body.theme-space::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.8) 0%, transparent 5%),
+                        radial-gradient(circle at 70% 60%, rgba(255,215,0,0.8) 0%, transparent 5%),
+                        radial-gradient(circle at 20% 80%, rgba(100,149,237,0.8) 0%, transparent 5%),
+                        radial-gradient(circle at 80% 20%, rgba(255,105,180,0.8) 0%, transparent 5%);
+            background-size: 200% 200%;
+            pointer-events: none;
+            animation: spaceTwinkle 4s ease-in-out infinite;
+        }
+
+        body.theme-space::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(2px 2px at 10px 20px, white, rgba(0,0,0,0)),
+                radial-gradient(3px 3px at 50px 80px, white, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 150px 40px, white, rgba(0,0,0,0)),
+                radial-gradient(4px 4px at 250px 100px, white, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 350px 150px, white, rgba(0,0,0,0)),
+                radial-gradient(3px 3px at 450px 70px, white, rgba(0,0,0,0));
+            background-repeat: repeat;
+            pointer-events: none;
+            animation: stars 100s linear infinite;
+        }
+
+        @keyframes spaceTwinkle {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
 
         /* Бонусы */
         .bonus-container {
@@ -165,6 +467,16 @@
             max-width: 1600px;
             width: 100%;
             align-items: flex-start;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s ease 2s forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* ===== КЛИКЕР СЕКЦИЯ ===== */
@@ -1114,6 +1426,29 @@
     </style>
 </head>
 <body class="theme-sunset">
+    <!-- Анимированный экран загрузки -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-particles">
+            <div class="particle" style="top: 10%; left: 20%; animation-delay: 0s;"></div>
+            <div class="particle" style="top: 30%; left: 80%; animation-delay: 0.5s;"></div>
+            <div class="particle" style="top: 70%; left: 30%; animation-delay: 1s;"></div>
+            <div class="particle" style="top: 50%; left: 60%; animation-delay: 1.5s;"></div>
+            <div class="particle" style="top: 90%; left: 40%; animation-delay: 2s;"></div>
+        </div>
+        <div class="loading-content">
+            <div class="loading-spinner">
+                <div class="spinner-ring"></div>
+                <div class="spinner-ring"></div>
+                <div class="spinner-ring"></div>
+            </div>
+            <h1 class="loading-title">Уголок Юрьева</h1>
+            <p class="loading-subtitle">Мега-центр развлечений</p>
+            <div class="loading-progress">
+                <div class="loading-progress-bar"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- Бонусы -->
     <div class="bonus-container" id="bonusContainer"></div>
     <div class="bonus-indicator" id="bonusIndicator">
@@ -1642,6 +1977,13 @@
         // Telegram
         let tg = null;
         try { tg = window.Telegram?.WebApp; if(tg) tg.ready(); } catch(e){}
+
+        // Управление экраном загрузки
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                document.getElementById('loadingScreen').classList.add('fade-out');
+            }, 2000);
+        });
 
         // ==================== ДОСТИЖЕНИЯ (52 шт) ====================
         const mainAchievements = [
