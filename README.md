@@ -1742,7 +1742,7 @@
                     </div>
                     
                     <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-                        <button class="pong-btn" onclick="spinSlotMachine()" style="background: linear-gradient(145deg, #ffd700, #ffa500);">
+                        <button class="pong-btn" onclick="spinSlotMachine()" id="spinButton" style="background: linear-gradient(145deg, #ffd700, #ffa500);">
                             <i class="fas fa-play"></i> Крутить
                         </button>
                         <button class="pong-btn" onclick="resetCasino()" style="background: linear-gradient(145deg, #ff6b6b, #ff8e8e);">
@@ -2077,6 +2077,10 @@
         let casinoDoubleWinChance = 0; // шанс удвоения выигрыша (%)
         let casinoJackpotBonus = 0; // +% к шансу джекпота
 
+        // Кулдаун для казино (5 секунд)
+        let casinoCooldown = false;
+        let casinoCooldownTimer = null;
+
         // ==================== ПИНГ-ПОНГ ====================
         let pongWins = 0, pongPerfectGames = 0, pongAces = 0, pongComebacks = 0, pongImpossibleWins = 0;
         let pongGameRunning = false, pongGamePaused = false;
@@ -2349,7 +2353,7 @@
             }
         }
 
-        // ==================== КАЗИНО (ОБНОВЛЕННОЕ) ====================
+        // ==================== КАЗИНО (ОБНОВЛЕННОЕ С КУЛДАУНОМ) ====================
         function updateCasinoUI() {
             document.getElementById('casinoBalance').textContent = casinoBalance + ' ₽';
             updateWinProbability();
@@ -2368,7 +2372,35 @@
                 `Шанс выигрыша: <span style="color:#ffd700;">${Math.min(80, totalChance)}%</span> (чем больше ставка, тем меньше шанс)`;
         }
 
+        function startCasinoCooldown() {
+            casinoCooldown = true;
+            const spinButton = document.getElementById('spinButton');
+            spinButton.disabled = true;
+            spinButton.style.opacity = '0.5';
+            spinButton.innerHTML = '<i class="fas fa-hourglass"></i> 5с';
+            
+            let secondsLeft = 5;
+            casinoCooldownTimer = setInterval(() => {
+                secondsLeft--;
+                if (secondsLeft > 0) {
+                    spinButton.innerHTML = `<i class="fas fa-hourglass"></i> ${secondsLeft}с`;
+                } else {
+                    clearInterval(casinoCooldownTimer);
+                    casinoCooldown = false;
+                    spinButton.disabled = false;
+                    spinButton.style.opacity = '1';
+                    spinButton.innerHTML = '<i class="fas fa-play"></i> Крутить';
+                }
+            }, 1000);
+        }
+
         function spinSlotMachine() {
+            // Проверяем кулдаун
+            if (casinoCooldown) {
+                showNotification('⏳ Подождите 5 секунд между вращениями!', 'warning');
+                return;
+            }
+
             let betAmount = parseInt(document.getElementById('betAmount').value);
             
             // Принудительно ограничиваем ставку до 1000
@@ -2476,6 +2508,9 @@
             updateCasinoUI();
             checkAchievements();
             saveGame();
+
+            // Запускаем кулдаун после успешного вращения
+            startCasinoCooldown();
         }
 
         function resetCasino() {
@@ -3040,6 +3075,16 @@
             purchaseSound.load();
             achievementSound.load();
             casinoWinSound.load();
+
+            // Сброс кулдауна при загрузке
+            if (casinoCooldownTimer) {
+                clearInterval(casinoCooldownTimer);
+                casinoCooldown = false;
+                const spinButton = document.getElementById('spinButton');
+                spinButton.disabled = false;
+                spinButton.style.opacity = '1';
+                spinButton.innerHTML = '<i class="fas fa-play"></i> Крутить';
+            }
         };
     </script>
 </body>
