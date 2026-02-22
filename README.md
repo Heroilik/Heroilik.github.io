@@ -2379,7 +2379,7 @@
             spinButton.style.opacity = '0.5';
             spinButton.innerHTML = '<i class="fas fa-hourglass"></i> 3с';
             
-            let secondsLeft = 5;
+            let secondsLeft = 3;
             casinoCooldownTimer = setInterval(() => {
                 secondsLeft--;
                 if (secondsLeft > 0) {
@@ -3089,4 +3089,5 @@
     </script>
 </body>
 </html>
+
 
